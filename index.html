@@ -998,52 +998,25 @@
             k === "risk"
               ? RISK_GROUPS.map(({ id, label }) => ({ value: id, label }))
               : uniq(k, src).map((value) => ({ value, label: value }));
-          const singleSelect = k === "district";
-          const allSelected = options.length > 0 && options.every(({ value }) => sel.includes(value));
-          const leadingOption = singleSelect
-            ? `<label class="select-all"><input type="radio" name="filter-district" data-clear-district ${sel.length ? "" : "checked"}>ทุกอำเภอ</label>`
-            : `<label class="select-all"><input type="checkbox" data-select-all ${allSelected ? "checked" : ""}>เลือกทั้งหมด</label>`;
-          d.innerHTML = `<label>${l}</label><details><summary>${filterSummary(sel, options)}</summary><div class="opts">${leadingOption}${options
+          d.innerHTML = `<label>${l}</label><details><summary>${filterSummary(sel, options)}</summary><div class="opts"><label class="select-all"><input type="radio" name="filter-${k}" data-clear-filter value="" ${sel.length ? "" : "checked"}>ทั้งหมด</label>${options
             .map(
               ({ value, label }) =>
-                `<label><input type="${singleSelect ? "radio" : "checkbox"}" name="filter-${k}" data-option value="${value.replace(/"/g, "&quot;")}" ${sel.includes(value) ? "checked" : ""}>${label}</label>`,
+                `<label><input type="radio" name="filter-${k}" data-option value="${value.replace(/"/g, "&quot;")}" ${sel.includes(value) ? "checked" : ""}>${label}</label>`,
             )
             .join("")}</div></details>`;
-          const optionInputs = [...d.querySelectorAll("input[data-option]")];
-          const selectAll = d.querySelector("input[data-select-all]");
-          const clearDistrict = d.querySelector("input[data-clear-district]");
-          const updateSelection = () => {
-            draft[k] = optionInputs
-              .filter((input) => input.checked)
-              .map((input) => input.value);
-            if (selectAll) {
-              selectAll.checked =
-                optionInputs.length > 0 &&
-                optionInputs.every((input) => input.checked);
-            }
-            if (k === "district") {
-              draft.unit = [];
-              buildFilters();
-            } else {
-              d.querySelector("summary").textContent = filterSummary(draft[k], options);
-            }
-            applyDraftFilters();
-          };
-          optionInputs.forEach((input) => (input.onchange = updateSelection));
-          if (selectAll) {
-            selectAll.onchange = () => {
-              optionInputs.forEach((input) => (input.checked = selectAll.checked));
-              updateSelection();
-            };
-          }
-          if (clearDistrict) {
-            clearDistrict.onchange = () => {
-              draft.district = [];
-              draft.unit = [];
-              buildFilters();
+          d.querySelectorAll("input[type=radio]").forEach((choice) => {
+            choice.onchange = () => {
+              draft[k] = choice.value ? [choice.value] : [];
+              if (k === "district") {
+                draft.unit = [];
+                buildFilters();
+              } else {
+                d.querySelector("summary").textContent = filterSummary(draft[k], options);
+              }
+              d.querySelector("details").open = false;
               applyDraftFilters();
             };
-          }
+          });
           box.appendChild(d);
         });
         box.insertAdjacentHTML(
