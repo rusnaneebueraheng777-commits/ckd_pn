@@ -221,6 +221,8 @@
         font-size: 0.9rem;
         color: #334155;
         position: relative;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
       }
       summary::-webkit-details-marker {
         display: none;
@@ -263,6 +265,12 @@
       }
       .opts label:hover {
         background: #f1f5f9;
+      }
+      .opts .select-all {
+        font-weight: 700;
+        border-bottom: 1px solid #edf1f5;
+        border-radius: 0;
+        margin-bottom: 4px;
       }
       .opts input {
         accent-color: var(--teal);
@@ -969,6 +977,13 @@
         [...new Set(src.map((r) => String(r[k])).filter(Boolean))].sort(
           (a, b) => a.localeCompare(b, "th"),
         );
+      const filterSummary = (selected, options) => {
+        const labels = options
+          .filter((option) => selected.includes(option.value))
+          .map((option) => option.label);
+        if (labels.length && labels.length === options.length) return "ทั้งหมด";
+        return labels.length ? labels.join(", ") : "ทั้งหมด";
+      };
       function buildFilters() {
         const box = $("filters");
         box.innerHTML = "";
@@ -983,30 +998,52 @@
             k === "risk"
               ? RISK_GROUPS.map(({ id, label }) => ({ value: id, label }))
               : uniq(k, src).map((value) => ({ value, label: value }));
-          d.innerHTML = `<label>${l}</label><details><summary>${sel.length ? "เลือก " + sel.length + " รายการ" : "ทั้งหมด"}</summary><div class="opts">${options
+          const singleSelect = k === "district";
+          const allSelected = options.length > 0 && options.every(({ value }) => sel.includes(value));
+          const leadingOption = singleSelect
+            ? `<label class="select-all"><input type="radio" name="filter-district" data-clear-district ${sel.length ? "" : "checked"}>ทุกอำเภอ</label>`
+            : `<label class="select-all"><input type="checkbox" data-select-all ${allSelected ? "checked" : ""}>เลือกทั้งหมด</label>`;
+          d.innerHTML = `<label>${l}</label><details><summary>${filterSummary(sel, options)}</summary><div class="opts">${leadingOption}${options
             .map(
               ({ value, label }) =>
-                `<label><input type="checkbox" value="${value.replace(/"/g, "&quot;")}" ${sel.includes(value) ? "checked" : ""}>${label}</label>`,
+                `<label><input type="${singleSelect ? "radio" : "checkbox"}" name="filter-${k}" data-option value="${value.replace(/"/g, "&quot;")}" ${sel.includes(value) ? "checked" : ""}>${label}</label>`,
             )
             .join("")}</div></details>`;
-          d.querySelectorAll("input").forEach(
-            (i) =>
-              (i.onchange = () => {
-                draft[k] = [...d.querySelectorAll("input:checked")].map(
-                  (x) => x.value,
-                );
-                if (k === "district") {
-                  draft.unit = [];
-                  buildFilters();
-                  const dd = box.children[1].querySelector("details");
-                  if (dd) dd.open = true;
-                } else
-                  d.querySelector("summary").textContent = draft[k].length
-                    ? "เลือก " + draft[k].length + " รายการ"
-                    : "ทั้งหมด";
-                applyDraftFilters();
-              }),
-          );
+          const optionInputs = [...d.querySelectorAll("input[data-option]")];
+          const selectAll = d.querySelector("input[data-select-all]");
+          const clearDistrict = d.querySelector("input[data-clear-district]");
+          const updateSelection = () => {
+            draft[k] = optionInputs
+              .filter((input) => input.checked)
+              .map((input) => input.value);
+            if (selectAll) {
+              selectAll.checked =
+                optionInputs.length > 0 &&
+                optionInputs.every((input) => input.checked);
+            }
+            if (k === "district") {
+              draft.unit = [];
+              buildFilters();
+            } else {
+              d.querySelector("summary").textContent = filterSummary(draft[k], options);
+            }
+            applyDraftFilters();
+          };
+          optionInputs.forEach((input) => (input.onchange = updateSelection));
+          if (selectAll) {
+            selectAll.onchange = () => {
+              optionInputs.forEach((input) => (input.checked = selectAll.checked));
+              updateSelection();
+            };
+          }
+          if (clearDistrict) {
+            clearDistrict.onchange = () => {
+              draft.district = [];
+              draft.unit = [];
+              buildFilters();
+              applyDraftFilters();
+            };
+          }
           box.appendChild(d);
         });
         box.insertAdjacentHTML(
