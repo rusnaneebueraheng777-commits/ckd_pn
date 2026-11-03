@@ -1,0 +1,1200 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>รายงานการตรวจคัดกรองโรคไตเรื้อรัง</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --teal: #0f766e;
+        --teal-light: #ccfbf1;
+        --blue: #2563eb;
+        --bg: #f4f7fb;
+        --card: #fff;
+        --tx: #172b4d;
+        --mu: #64748b;
+        --bd: #e2e8f0;
+        --shadow: 0 8px 24px rgba(15, 23, 42, 0.055);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Sarabun", sans-serif;
+        background:
+          radial-gradient(ellipse at 8% 0%, #e0f2fe 0, transparent 34rem),
+          var(--bg);
+        color: var(--tx);
+        line-height: 1.5;
+      }
+      header {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(
+          115deg,
+          #0f766e 0%,
+          #0d9488 48%,
+          #2563eb 100%
+        );
+        color: #fff;
+        padding: 28px max(24px, calc((100% - 1240px) / 2));
+        box-shadow: 0 8px 24px rgba(13, 148, 136, 0.18);
+      }
+      header:after {
+        content: "";
+        position: absolute;
+        width: 240px;
+        height: 240px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 50%;
+        right: 8%;
+        top: -150px;
+        box-shadow:
+          0 0 0 28px rgba(255, 255, 255, 0.04),
+          0 0 0 58px rgba(255, 255, 255, 0.035);
+      }
+      header h1 {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+        font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+      header p {
+        position: relative;
+        z-index: 1;
+        margin: 3px 0 0;
+        opacity: 0.88;
+        font-size: 0.92rem;
+        letter-spacing: 0.03em;
+      }
+      main {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 24px 20px 40px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 18px;
+      }
+      main > *,
+      .grid {
+        min-width: 0;
+      }
+      .card {
+        min-width: 0;
+        background: var(--card);
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+        transition:
+          box-shadow 0.18s ease,
+          transform 0.18s ease;
+      }
+      .card h3 {
+        margin: 0 0 4px;
+        font-size: 1.02rem;
+        font-weight: 700;
+        color: #243b53;
+      }
+      .note {
+        font-size: 0.78rem;
+        color: var(--mu);
+        margin: 0 0 10px;
+      }
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+      .g4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .g2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      @media (max-width: 900px) {
+        .g4 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .g2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      label {
+        font-size: 0.8rem;
+        color: var(--mu);
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+      }
+      input,
+      select,
+      button {
+        font-family: inherit;
+        font-size: 0.9rem;
+      }
+      input[type="date"],
+      input[type="text"],
+      input[type="url"] {
+        width: 100%;
+        min-height: 42px;
+        padding: 9px 12px;
+        border: 1px solid #d7e0ea;
+        border-radius: 10px;
+        background: #fff;
+        color: var(--tx);
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+      }
+      input:focus,
+      summary:focus-visible,
+      button:focus-visible {
+        outline: 0;
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.16);
+      }
+      button {
+        min-height: 40px;
+        padding: 8px 15px;
+        border-radius: 10px;
+        border: 1px solid #d7e0ea;
+        background: #fff;
+        color: #334155;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          border-color 0.15s,
+          transform 0.15s,
+          box-shadow 0.15s;
+      }
+      button:hover:not(:disabled) {
+        background: #f8fafc;
+        border-color: #94a3b8;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(15, 23, 42, 0.08);
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      button.p {
+        background: linear-gradient(135deg, #0f766e, #0d9488);
+        color: #fff;
+        border-color: var(--teal);
+        box-shadow: 0 3px 8px rgba(15, 118, 110, 0.18);
+      }
+      button.p:hover:not(:disabled) {
+        background: linear-gradient(135deg, #115e59, #0f766e);
+      }
+      button.b {
+        color: #1d4ed8;
+        border-color: #bfdbfe;
+        background: #eff6ff;
+      }
+      button.b:hover:not(:disabled) {
+        background: #dbeafe;
+        border-color: #93c5fd;
+      }
+      details {
+        position: relative;
+      }
+      summary {
+        list-style: none;
+        min-height: 42px;
+        padding: 9px 34px 9px 12px;
+        border: 1px solid #d7e0ea;
+        border-radius: 10px;
+        background: #fff;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: #334155;
+        position: relative;
+      }
+      summary::-webkit-details-marker {
+        display: none;
+      }
+      summary:after {
+        content: "⌄";
+        position: absolute;
+        right: 12px;
+        top: 7px;
+        color: #64748b;
+        font-size: 1.1rem;
+      }
+      details[open] summary:after {
+        content: "⌃";
+      }
+      details[open] .opts {
+        position: absolute;
+        z-index: 10;
+        left: 0;
+        right: 0;
+        max-height: 260px;
+        overflow: auto;
+        background: #fff;
+        border: 1px solid var(--bd);
+        border-radius: 10px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+        padding: 6px;
+        margin-top: 5px;
+      }
+      .opts label {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding: 7px 8px;
+        color: var(--tx);
+        font-size: 0.86rem;
+        margin: 0;
+        border-radius: 7px;
+        cursor: pointer;
+      }
+      .opts label:hover {
+        background: #f1f5f9;
+      }
+      .opts input {
+        accent-color: var(--teal);
+      }
+      .big {
+        font-size: 2.25rem;
+        line-height: 1.2;
+        font-weight: 700;
+        color: var(--teal);
+        margin-top: 8px;
+        letter-spacing: -0.03em;
+      }
+      .grid.g4 > .card:nth-child(1),
+      .grid.g4 > .card:nth-child(2) {
+        background: linear-gradient(145deg, #fff, #f8fbff);
+      }
+      .risk-cards {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 14px;
+      }
+      .risk-tile {
+        min-width: 0;
+        min-height: 126px;
+        padding: 14px 15px;
+        border: 1px solid var(--risk-border);
+        border-left: 5px solid var(--risk-color);
+        border-radius: 12px;
+        background: var(--risk-bg);
+      }
+      .risk-tile h4 {
+        min-height: 2.8em;
+        margin: 0;
+        color: #334155;
+        font-size: 0.88rem;
+        line-height: 1.4;
+      }
+      .risk-value {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 4px 8px;
+        margin-top: 8px;
+      }
+      .risk-value strong {
+        color: var(--risk-text);
+        font-size: 1.6rem;
+        line-height: 1.2;
+        font-variant-numeric: tabular-nums;
+      }
+      .risk-value span {
+        color: #475569;
+        font-size: 0.82rem;
+      }
+      .risk-hypertension {
+        --risk-bg: #eff6ff;
+        --risk-border: #bfdbfe;
+        --risk-color: #60a5fa;
+        --risk-text: #1d4ed8;
+      }
+      .risk-diabetes {
+        --risk-bg: #f0fdf4;
+        --risk-border: #bbf7d0;
+        --risk-color: #4ade80;
+        --risk-text: #15803d;
+      }
+      .risk-lipid {
+        --risk-bg: #fffbeb;
+        --risk-border: #fde68a;
+        --risk-color: #facc15;
+        --risk-text: #a16207;
+      }
+      .risk-cardiovascular {
+        --risk-bg: #fff1f2;
+        --risk-border: #fecdd3;
+        --risk-color: #fb7185;
+        --risk-text: #be123c;
+      }
+      .risk-respiratory {
+        --risk-bg: #f5f3ff;
+        --risk-border: #ddd6fe;
+        --risk-color: #a78bfa;
+        --risk-text: #6d28d9;
+      }
+      .risk-gout {
+        --risk-bg: #fff7ed;
+        --risk-border: #fed7aa;
+        --risk-color: #fb923c;
+        --risk-text: #c2410c;
+      }
+      .risk-behavior {
+        --risk-bg: #f0fdfa;
+        --risk-border: #99f6e4;
+        --risk-color: #2dd4bf;
+        --risk-text: #0f766e;
+      }
+      .risk-other {
+        --risk-bg: #f8fafc;
+        --risk-border: #e2e8f0;
+        --risk-color: #94a3b8;
+        --risk-text: #475569;
+      }
+      .risk-chart {
+        height: 420px;
+      }
+      @media (max-width: 900px) {
+        .risk-cards {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 0.88rem;
+        padding: 3px 0;
+        border-bottom: 1px dashed #edf1f5;
+      }
+      .row:last-child {
+        border-bottom: 0;
+      }
+      .row b {
+        font-variant-numeric: tabular-nums;
+      }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        align-items: center;
+        margin-top: 14px;
+      }
+      .bar .note {
+        align-self: center;
+      }
+      .alert {
+        padding: 12px 15px;
+        border-radius: 11px;
+        font-size: 0.88rem;
+      }
+      .err {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+      }
+      .warn {
+        background: #fffbeb;
+        color: #92400e;
+        border: 1px solid #fde68a;
+      }
+      .chart {
+        position: relative;
+        height: 290px;
+        margin-top: 4px;
+      }
+      .hide {
+        display: none;
+      }
+      @media (max-width: 600px) {
+        header {
+          padding: 22px 18px;
+        }
+        header:after {
+          right: -100px;
+        }
+        main {
+          padding: 16px 12px 28px;
+          gap: 13px;
+        }
+        .card {
+          padding: 15px;
+          border-radius: 13px;
+        }
+        .grid {
+          gap: 12px;
+        }
+        .grid.g4 > .card {
+          padding: 14px;
+        }
+        .big {
+          font-size: 1.9rem;
+        }
+        .bar {
+          gap: 7px;
+        }
+        .bar button {
+          flex: 1;
+        }
+        .bar input[type="url"],
+        .bar input[type="text"] {
+          min-width: 0 !important;
+          flex: 1 1 100% !important;
+        }
+        #sync {
+          flex: 1 1 100%;
+        }
+        .chart {
+          height: 260px;
+        }
+        .risk-chart {
+          height: 460px;
+        }
+      }
+      @media (max-width: 380px) {
+        .g4 {
+          grid-template-columns: 1fr;
+        }
+        .risk-cards {
+          grid-template-columns: 1fr;
+        }
+        .grid.g4 > .card {
+          padding: 15px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *:before,
+        *:after {
+          scroll-behavior: auto !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1> รายงานการตรวจคัดกรองโรคไตเรื้อรัง</h1>
+      <p>Chronic Kidney Disease Screening Report</p>
+    </header>
+    <main>
+      <div id="msg"></div>
+      <div class="card">
+        <div class="grid g4" id="filters"></div>
+        <div class="bar">
+          <button class="p" id="go">ค้นหา</button
+          ><button id="clear">ล้างตัวกรอง</button>
+        </div>
+      </div>
+      <div class="grid g4 summary-grid">
+        <div class="card">
+          <h3>รายการตรวจทั้งหมด</h3>
+          <div class="big" id="cTotal">-</div>
+        </div>
+        <div class="card">
+          <h3>เพศ</h3>
+          <div id="cSex"></div>
+        </div>
+        <div class="card">
+          <h3>ผลตรวจ</h3>
+          <div id="cRes"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>กลุ่มเสี่ยง</h3>
+        <p class="note">
+          ร้อยละคิดจากจำนวนคนทั้งหมดในข้อมูลที่กรอง ผู้ที่มีโรคร่วมอาจถูกนับในหลายหมวด
+          จึงทำให้ผลรวมร้อยละเกิน 100% ได้
+        </p>
+        <div id="cRisk" class="risk-cards"></div>
+      </div>
+      <div class="grid g2">
+        <div class="card">
+          <h3>1. เปรียบเทียบจำนวนคนตามกลุ่มเสี่ยง</h3>
+          <p class="note">เรียงจากจำนวนมากไปน้อย</p>
+          <div class="chart risk-chart"><canvas id="ch1"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>2. สัดส่วนเพศ</h3>
+          <p class="note base"></p>
+          <div class="chart"><canvas id="ch2"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>3. กลุ่มอายุ (ช่วงละ 10 ปี)</h3>
+          <p class="note">ไม่ระบุอายุจะแยกเป็น "ไม่ระบุ"</p>
+          <div class="chart"><canvas id="ch3"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>4. ผลตรวจ</h3>
+          <p class="note base"></p>
+          <div class="chart"><canvas id="ch4"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>5. แยกตามอำเภอ</h3>
+          <p class="note base"></p>
+          <div class="chart"><canvas id="ch5"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>
+            6. แยกตามหน่วยงานบริการ
+            <button id="allU" style="padding: 2px 8px; font-size: 0.75rem">
+              ดูทั้งหมด
+            </button>
+          </h3>
+          <p class="note" id="n6">Top 10</p>
+          <div class="chart" id="w6"><canvas id="ch6"></canvas></div>
+        </div>
+      </div>
+    </main>
+    <script>
+      // ===== ตั้งค่า: ใส่ลิงก์ CSV ตรงนี้ได้ (หรือวางในช่องด้านบนก็ได้) =====
+      const DEFAULT_SHEET_URL =
+        "https://docs.google.com/spreadsheets/d/13DevNonLNIttx9Y3Q4rjthe7of3_ZQ5q/edit";
+      // ชื่อหัวคอลัมน์ที่ระบบจับคู่ (ตรวจว่า "มีคำนี้อยู่ในหัวคอลัมน์") — แก้เพิ่มได้ตามชีตจริง
+      const ALIASES = {
+        pid: ["cid", "pid", "รหัสบุคคล", "เลขบัตร", "hn", "code"],
+        date: ["วันที่ตรวจ", "date", "วันที่"],
+        fy: ["ปีงบ", "fiscal"],
+        district: ["อำเภอ", "district", "amphur"],
+        unit: [
+          "หน่วยบริการ",
+          "หน่วยงาน",
+          "สถานบริการ",
+          "รพ.สต",
+          "unit",
+          "hospital",
+        ],
+        sex: ["เพศ", "sex", "gender"],
+        age: ["อายุ", "age"],
+        result: ["ผลตรวจ", "ผลการตรวจ", "result"],
+        risk: ["กลุ่มเสี่ยง", "กลุ่มโรค", "risk", "โรค"],
+      };
+      const COLORS = [
+        "#5eead4",
+        "#93c5fd",
+        "#fcd34d",
+        "#fda4af",
+        "#c4b5fd",
+        "#86efac",
+        "#fdba74",
+        "#a5b4fc",
+        "#f9a8d4",
+        "#bef264",
+      ];
+      const FILTERS = [
+        ["fy", "ปีงบประมาณ"],
+        ["district", "อำเภอ"],
+        ["unit", "หน่วยงานบริการ"],
+        ["sex", "เพศ"],
+        ["result", "ผลตรวจ"],
+        ["risk", "กลุ่มเสี่ยง"],
+      ];
+      const RISK_GROUPS = [
+        {
+          id: "hypertension",
+          label: "โรคความดันโลหิตสูง",
+          tags: ["HT"],
+          color: "#93c5fd",
+        },
+        {
+          id: "diabetes",
+          label: "โรคเบาหวาน",
+          tags: ["DM"],
+          color: "#86efac",
+        },
+        {
+          id: "lipid",
+          label: "โรคไขมันในเลือดผิดปกติ",
+          tags: ["DLP"],
+          color: "#fcd34d",
+        },
+        {
+          id: "cardiovascular",
+          label: "โรคหัวใจและหลอดเลือด",
+          tags: ["HEART", "VASCULAR"],
+          color: "#fda4af",
+        },
+        {
+          id: "respiratory",
+          label: "โรคระบบทางเดินหายใจ",
+          tags: ["ASTHMA", "COPD"],
+          color: "#c4b5fd",
+        },
+        {
+          id: "gout",
+          label: "โรคเกาต์",
+          tags: ["GOUT"],
+          color: "#fdba74",
+        },
+        {
+          id: "behavior",
+          label: "พฤติกรรมสุขภาพและการใช้ผลิตภัณฑ์สุขภาพ",
+          tags: ["BEHAVIOR"],
+          color: "#5eead4",
+        },
+        {
+          id: "other",
+          label: "ข้อมูลอื่น ๆ",
+          tags: [],
+          color: "#cbd5e1",
+        },
+      ];
+      const $ = (id) => document.getElementById(id);
+      let rows = [],
+        draft = {},
+        applied = {},
+        mapping = {},
+        headers = [],
+        charts = {},
+        showAllUnits = false;
+
+      // ---------- CSV parser (รองรับเครื่องหมายคำพูดและภาษาไทย) ----------
+      function parseCSV(t) {
+        t = t.replace(/^\uFEFF/, "");
+        const out = [];
+        let r = [],
+          c = "",
+          q = false;
+        for (let i = 0; i < t.length; i++) {
+          const ch = t[i];
+          if (q) {
+            if (ch == '"') {
+              if (t[i + 1] == '"') {
+                c += '"';
+                i++;
+              } else q = false;
+            } else c += ch;
+          } else if (ch == '"') q = true;
+          else if (ch == ",") {
+            r.push(c);
+            c = "";
+          } else if (ch == "\n" || ch == "\r") {
+            if (ch == "\r" && t[i + 1] == "\n") i++;
+            r.push(c);
+            out.push(r);
+            r = [];
+            c = "";
+          } else c += ch;
+        }
+        if (c !== "" || r.length) {
+          r.push(c);
+          out.push(r);
+        }
+        return out;
+      }
+      function parseDate(s) {
+        s = (s || "").trim();
+        let m, y, mo, d;
+        if ((m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/))) {
+          d = +m[1];
+          mo = +m[2];
+          y = +m[3];
+        } else if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) {
+          y = +m[1];
+          mo = +m[2];
+          d = +m[3];
+        } else return "";
+        if (y > 2400) y -= 543;
+        return `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      }
+      function normalizeResult(value) {
+        const result = String(value || "")
+          .trim()
+          .toLowerCase()
+          .replace(/[\s_,]/g, "");
+        if (["normal", "noraml", "ปกติ"].includes(result)) return "Normal";
+        if (["proteinuria", "โปรตีนรั่ว"].includes(result)) return "Proteinuria";
+        if (
+          result === "microalbuminuria" ||
+          result === "microalbuminnuria" ||
+          result === "microalbuminuria"
+        ) {
+          return "Microalbuminuria";
+        }
+        const numeric = result.match(/^(<=|<|≤|>=|>|≥)?([0-9]+(?:\.[0-9]+)?)(?:mg\/g)?$/);
+        if (numeric) {
+          const operator = numeric[1] || "";
+          const amount = Number(numeric[2]);
+          if ((operator === "<" && amount <= 30) || (operator === "≤" && amount < 30) || (operator === "<=" && amount < 30)) {
+            return "Normal";
+          }
+          if ((operator === ">" || operator === ">=" || operator === "≥") && amount >= 300) {
+            return "Proteinuria";
+          }
+          if (!operator) {
+            if (amount < 30) return "Normal";
+            if (amount < 300) return "Microalbuminuria";
+            return "Proteinuria";
+          }
+          if (operator === "<" || operator === "≤" || operator === "<=") return "Microalbuminuria";
+          if (operator === ">" || operator === ">=" || operator === "≥") {
+            return amount < 300 ? "Microalbuminuria" : "Proteinuria";
+          }
+        }
+        return result ? String(value).trim() : "ไม่ระบุ";
+      }
+      function normalizeRisk(value) {
+        const original = String(value || "").trim();
+        const key = original.toLowerCase().replace(/\s+/g, "");
+        const aliases = {
+          ht: "HT",
+          ความดัน: "HT",
+          dm: "DM",
+          เบาหวาน: "DM",
+          dlp: "DLP",
+          dpl: "DLP",
+          ไขมัน: "DLP",
+          "ht/dm": "HT/DM",
+          "dm/ht": "HT/DM",
+          "ความดัน/เบาหวาน": "HT/DM",
+          "เบาหวาน/ความดัน": "HT/DM",
+          "ht/dlp": "HT/DLP",
+          "dlp/ht": "HT/DLP",
+          "dpl/ht": "HT/DLP",
+          "ht/dpl": "HT/DLP",
+          "ความดัน/ไขมัน": "HT/DLP",
+          "ไขมัน/ความดัน": "HT/DLP",
+          "เบาหวาน/หัวใจ": "DM/หัวใจ",
+          "dm/หัวใจ": "DM/หัวใจ",
+          "หัวใจ/เบาหวาน": "DM/หัวใจ",
+          "ไขมัน/เกาต์": "DLP/เกาต์",
+          "dpl/เกาต์": "DLP/เกาต์",
+          "dlp/เกาต์": "DLP/เกาต์",
+          "เกาต์/ไขมัน": "DLP/เกาต์",
+          "ใช้ยาแก้ปวดบ่อย": "ใช้ยาแก้ปวดบ่อย",
+          "ใช้สมุนไพร": "ใช้สมุนไพร",
+          "กินอาหารเสริม": "กินอาหารเสริม",
+          asthma: "Asthma",
+          copd: "COPD",
+          "ปฎิเสธ": "ปฏิเสธ",
+          "ปฏิเสธ": "ปฏิเสธ",
+          "ปฏืเสธ": "ปฏิเสธ",
+          "-": "-",
+        };
+        return aliases[key] || original || "ไม่ระบุ";
+      }
+      function riskTags(value) {
+        const original = String(value || "").trim();
+        const behavior = /(ยาแก้ปวด|สมุนไพร|อาหารเสริม|ซื้อยากินเอง|ขาดยา)/i.test(
+          original,
+        );
+        const searchable = original
+          .toLowerCase()
+          .replace(/ความดัน/g, " HT ")
+          .replace(/เบาหวาน/g, " DM ")
+          .replace(/ไขมัน/g, " DLP ")
+          .replace(/หัวใจ/g, " HEART ")
+          .replace(/เส้นเลือดตีบ/g, " VASCULAR ")
+          .replace(/เก๊าซ์|เกาต์/g, " GOUT ")
+          .replace(/ashtma|asthma/g, " ASTHMA ")
+          .replace(/copd/g, " COPD ")
+          .replace(/chf/g, " HEART ")
+          .replace(/dpl/g, " DLP ")
+          .replace(/dmht/g, " DM HT ")
+          .replace(/เสี่ยง|ป่วย/g, " ")
+          .toUpperCase();
+        const knownTags = new Set([
+          "HT",
+          "DM",
+          "DLP",
+          "ASTHMA",
+          "COPD",
+          "GOUT",
+          "HEART",
+          "VASCULAR",
+        ]);
+        const tags = new Set(
+          searchable.split(/[^A-Z]+/).filter((tag) => knownTags.has(tag)),
+        );
+        if (behavior) tags.add("BEHAVIOR");
+        return tags;
+      }
+      function riskGroupIds(value) {
+        const tags = riskTags(value);
+        const matched = RISK_GROUPS.filter(
+          (group) =>
+            group.id !== "other" &&
+            group.tags.some((tag) => tags.has(tag)),
+        ).map((group) => group.id);
+        return matched.length ? matched : ["other"];
+      }
+      const matchesRiskSelection = (value, selected) =>
+        !selected?.length ||
+        selected.some((group) => riskGroupIds(value).includes(group));
+      function build(text) {
+        const v = parseCSV(text).filter((r) => r.some((c) => c.trim()));
+        if (v.length < 2)
+          throw new Error("ไม่พบข้อมูลในไฟล์ (หรือลิงก์ไม่ใช่ CSV)");
+        headers = v[0].map((h) => h.trim());
+        const idx = {};
+        mapping = {};
+        for (const f in ALIASES) {
+          const exact = headers.findIndex((h) =>
+            ALIASES[f].some((a) => h.trim().toLowerCase() === a.toLowerCase()),
+          );
+          const i = exact >= 0
+            ? exact
+            : headers.findIndex((h) =>
+            ALIASES[f].some((a) => h.toLowerCase().includes(a.toLowerCase())),
+          );
+          idx[f] = i;
+          mapping[f] = i >= 0 ? headers[i] : null;
+        }
+        const g = (r, f) => (idx[f] >= 0 ? (r[idx[f]] || "").trim() : "");
+        rows = v.slice(1).map((r, rowIndex) => {
+          const date = parseDate(g(r, "date"));
+          let fy = g(r, "fy");
+          if (!fy && date) {
+            const y = +date.slice(0, 4),
+              m = +date.slice(5, 7);
+            fy = String((m >= 10 ? y + 1 : y) + 543);
+          } // ปีงบประมาณไทย เริ่ม 1 ต.ค.
+          const a = parseFloat(g(r, "age"));
+          return {
+            _rowId: rowIndex,
+            pid: g(r, "pid"),
+            date,
+            fy,
+            district: g(r, "district") || "ไม่ระบุ",
+            unit: g(r, "unit") || "ไม่ระบุ",
+            sex: g(r, "sex") || "ไม่ระบุ",
+            age: isNaN(a) ? null : a,
+            result: normalizeResult(g(r, "result")),
+            risk: normalizeRisk(g(r, "risk")),
+          };
+        });
+        $("msg").innerHTML = "";
+        draft = {};
+        applied = {};
+        buildFilters();
+        render();
+      }
+
+      // ---------- โหลดข้อมูล ----------
+      function sheetJSONPUrl(input, callbackName) {
+        const source = new URL(input);
+        const match = source.pathname.match(/\/spreadsheets\/d\/([^/]+)/);
+        if (!match) throw new Error("ลิงก์ Google Sheets ไม่ถูกต้อง");
+
+        const url = new URL(
+          `https://docs.google.com/spreadsheets/d/${match[1]}/gviz/tq`,
+        );
+        url.searchParams.set("gid", source.searchParams.get("gid") || "0");
+        url.searchParams.set(
+          "tqx",
+          `out:json;responseHandler:${callbackName}`,
+        );
+        url.searchParams.set("_", Date.now());
+        return url.toString();
+      }
+
+      function loadSheetJSONP(input) {
+        return new Promise((resolve, reject) => {
+          const callbackName = `__ckdSheet_${Date.now()}_${Math.random()
+            .toString(36)
+            .slice(2)}`;
+          const script = document.createElement("script");
+          const timeout = setTimeout(() => {
+            cleanup();
+            reject(new Error("หมดเวลารอข้อมูลจาก Google Sheets"));
+          }, 20000);
+
+          function cleanup() {
+            clearTimeout(timeout);
+            delete window[callbackName];
+            script.remove();
+          }
+
+          window[callbackName] = (response) => {
+            cleanup();
+            if (response.status !== "ok") {
+              reject(new Error("Google Sheets ไม่อนุญาตให้อ่านข้อมูล"));
+              return;
+            }
+            resolve(response);
+          };
+          script.onerror = () => {
+            cleanup();
+            reject(new Error("เชื่อมต่อ Google Sheets ไม่สำเร็จ"));
+          };
+          script.src = sheetJSONPUrl(input, callbackName);
+          document.head.appendChild(script);
+        });
+      }
+
+      function gvizToCSV(response) {
+        const table = response.table;
+        if (!table?.cols?.length) throw new Error("ชีตนี้ไม่มีหัวคอลัมน์");
+
+        const rows = [
+          table.cols.map((column) => column.label || column.id || ""),
+          ...table.rows.map((row) =>
+            table.cols.map((_, index) => {
+              const cell = row.c?.[index];
+              return cell?.f ?? cell?.v ?? "";
+            }),
+          ),
+        ];
+        const quote = (value) => `"${String(value).replace(/"/g, '""')}"`;
+        return rows.map((row) => row.map(quote).join(",")).join("\r\n");
+      }
+
+      async function loadURL() {
+        $("msg").innerHTML = "กำลังโหลด...";
+        try {
+          const response = await loadSheetJSONP(DEFAULT_SHEET_URL);
+          build(gvizToCSV(response));
+        } catch (e) {
+          $("msg").innerHTML =
+            `<div class="alert err">โหลดไม่สำเร็จ: ${e.message} — ตรวจว่าลิงก์ถูกต้องและตั้งสิทธิ์ชีตให้ผู้มีลิงก์ดูได้</div>`;
+        }
+      }
+      // ---------- ตัวกรอง ----------
+      const uniq = (k, src = rows) =>
+        [...new Set(src.map((r) => String(r[k])).filter(Boolean))].sort(
+          (a, b) => a.localeCompare(b, "th"),
+        );
+      function buildFilters() {
+        const box = $("filters");
+        box.innerHTML = "";
+        FILTERS.forEach(([k, l]) => {
+          const src =
+            k === "unit" && draft.district?.length
+              ? rows.filter((r) => draft.district.includes(r.district))
+              : rows;
+          const d = document.createElement("div");
+          const sel = draft[k] || [];
+          const options =
+            k === "risk"
+              ? RISK_GROUPS.map(({ id, label }) => ({ value: id, label }))
+              : uniq(k, src).map((value) => ({ value, label: value }));
+          d.innerHTML = `<label>${l}</label><details><summary>${sel.length ? "เลือก " + sel.length + " รายการ" : "ทั้งหมด"}</summary><div class="opts">${options
+            .map(
+              ({ value, label }) =>
+                `<label><input type="checkbox" value="${value.replace(/"/g, "&quot;")}" ${sel.includes(value) ? "checked" : ""}>${label}</label>`,
+            )
+            .join("")}</div></details>`;
+          d.querySelectorAll("input").forEach(
+            (i) =>
+              (i.onchange = () => {
+                draft[k] = [...d.querySelectorAll("input:checked")].map(
+                  (x) => x.value,
+                );
+                if (k === "district") {
+                  draft.unit = [];
+                  buildFilters();
+                  const dd = box.children[1].querySelector("details");
+                  if (dd) dd.open = true;
+                } else
+                  d.querySelector("summary").textContent = draft[k].length
+                    ? "เลือก " + draft[k].length + " รายการ"
+                    : "ทั้งหมด";
+                applyDraftFilters();
+              }),
+          );
+          box.appendChild(d);
+        });
+        box.insertAdjacentHTML(
+          "beforeend",
+          `<div><label>วันที่ตรวจเริ่มต้น</label><input type="date" id="from" value="${draft.from || ""}"></div><div><label>วันที่ตรวจสิ้นสุด</label><input type="date" id="to" value="${draft.to || ""}"></div>`,
+        );
+        $("from").onchange = (e) => {
+          draft.from = e.target.value;
+          applyDraftFilters();
+        };
+        $("to").onchange = (e) => {
+          draft.to = e.target.value;
+          applyDraftFilters();
+        };
+      }
+      function applyDraftFilters() {
+        applied = JSON.parse(JSON.stringify(draft));
+        render();
+      }
+      $("go").onclick = applyDraftFilters;
+      $("clear").onclick = () => {
+        draft = {};
+        applied = {};
+        buildFilters();
+        render();
+      };
+      function filtered() {
+        const f = applied;
+        return rows.filter(
+          (r) =>
+            FILTERS.every(([k]) =>
+              !f[k]?.length ||
+              (k === "risk"
+                ? matchesRiskSelection(r.risk, f.risk)
+                : f[k].includes(r[k])),
+            ) &&
+            (!f.from || (r.date && r.date >= f.from)) &&
+            (!f.to || (r.date && r.date <= f.to)),
+        );
+      }
+
+      // ---------- แสดงผล ----------
+      const cnt = (a, k) => {
+        const m = new Map();
+        a.forEach((r) => {
+          const x = k(r);
+          m.set(x, (m.get(x) || 0) + 1);
+        });
+        return [...m].map(([n, v]) => ({ n, v }));
+      };
+      const pct = (n, d) => (d ? ((n / d) * 100).toFixed(1) + "%" : "-");
+      function summarizeRisk(sourceRows) {
+        const groups = RISK_GROUPS.map((group) => ({
+          ...group,
+          people: new Set(),
+        }));
+        const population = new Set(
+          sourceRows.map((r) => r.pid.trim() || `row:${r._rowId}`),
+        ).size;
+        sourceRows.forEach((row) => {
+          const matched = groups.filter((group) =>
+            riskGroupIds(row.risk).includes(group.id),
+          );
+          const personKey = row.pid.trim() || `row:${row._rowId}`;
+          matched.forEach((group) =>
+            group.people.add(personKey),
+          );
+        });
+
+        return {
+          population,
+          groups: groups.map(({ people, ...group }) => ({
+            ...group,
+            count: people.size,
+          })),
+        };
+      }
+      const band = (a) =>
+        a == null
+          ? "ไม่ระบุ"
+          : a >= 80
+            ? "80+"
+            : `${Math.floor(a / 10) * 10}-${Math.floor(a / 10) * 10 + 9}`;
+      const list = (id, d, N) =>
+        ($(id).innerHTML =
+          d
+            .map(
+              (x) =>
+                `<div class="row"><span>${x.n}</span><b>${x.v.toLocaleString()} (${pct(x.v, N)})</b></div>`,
+            )
+            .join("") || "-");
+      function mk(id, type, data, horiz, denominator) {
+        charts[id]?.destroy();
+        const N = denominator ?? data.reduce((a, b) => a + b.v, 0);
+        const tip = {
+          callbacks: {
+            label: (c) =>
+              ` ${c.label}: ${c.parsed.y ?? c.parsed.x ?? c.parsed} (${pct(c.parsed.y ?? c.parsed.x ?? c.parsed, N)})`,
+          },
+        };
+        charts[id] = new Chart($(id), {
+          type,
+          data: {
+            labels: data.map((x) => x.n),
+            datasets: [
+              {
+                data: data.map((x) => x.v),
+                backgroundColor:
+                  type === "doughnut"
+                    ? COLORS
+                    : data.map(
+                        (item, index) => item.color || COLORS[index % COLORS.length],
+                      ),
+                borderRadius: type === "bar" ? 4 : 0,
+              },
+            ],
+          },
+          options: {
+            indexAxis: horiz ? "y" : "x",
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: type === "doughnut", position: "bottom" },
+              tooltip: tip,
+            },
+          },
+        });
+      }
+      function render() {
+        const a = filtered(),
+          N = a.length;
+        document
+          .querySelectorAll(".base")
+          .forEach(
+            (e) => (e.textContent = `ฐานคำนวณ ${N.toLocaleString()} รายการ`),
+          );
+        $("cTotal").textContent = N.toLocaleString();
+        const sex = cnt(a, (r) => r.sex),
+          risk = summarizeRisk(a),
+          res = cnt(a, (r) => r.result);
+        list("cSex", sex, N);
+        list("cRes", res, N);
+        $("cRisk").innerHTML =
+          risk.groups
+            .map((group) => {
+              const percent = pct(group.count, risk.population);
+              return `<article class="risk-tile risk-${group.id}"><h4>${group.label}</h4><div class="risk-value"><strong>${group.count.toLocaleString()}</strong><span>คน · ${percent}</span></div>${group.id === "other" ? '<p class="note">รวมปฏิเสธ ไม่ระบุ (-) และค่าที่ไม่ตรงหมวด</p>' : ""}</article>`;
+            })
+            .join("") || "-";
+        const riskChart = risk.groups
+          .map((group) => ({
+            n: group.label,
+            v: group.count,
+            color: group.color,
+          }))
+          .sort((x, y) => y.v - x.v);
+        mk("ch1", "bar", riskChart, true, risk.population);
+        mk("ch2", "doughnut", sex);
+        mk(
+          "ch3",
+          "bar",
+          cnt(a, (r) => band(r.age)).sort(
+            (x, y) => (parseInt(x.n) || 999) - (parseInt(y.n) || 999),
+          ),
+        );
+        mk("ch4", "bar", res);
+        mk(
+          "ch5",
+          "bar",
+          cnt(a, (r) => r.district).sort((x, y) => y.v - x.v),
+          true,
+        );
+        const units = cnt(a, (r) => r.unit).sort((x, y) => y.v - x.v),
+          u = showAllUnits ? units : units.slice(0, 10);
+        $("w6").style.height = Math.max(280, u.length * 26) + "px";
+        mk("ch6", "bar", u, true);
+      };
+      $("allU").onclick = () => {
+        showAllUnits = !showAllUnits;
+        $("allU").textContent = showAllUnits ? "แสดง Top 10" : "ดูทั้งหมด";
+        $("n6").textContent = showAllUnits ? "ทั้งหมด" : "Top 10";
+        render();
+      };
+
+      // ---------- เริ่มต้น ----------
+      buildFilters();
+      render();
+      loadURL();
+    </script>
+  </body>
+</html>
