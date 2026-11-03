@@ -1058,6 +1058,8 @@
         return [...m].map(([n, v]) => ({ n, v }));
       };
       const pct = (n, d) => (d ? ((n / d) * 100).toFixed(1) + "%" : "-");
+      const chartValue = (parsed, horizontal) =>
+        horizontal ? parsed.x : (parsed.y ?? parsed);
       function summarizeRisk(sourceRows) {
         const groups = RISK_GROUPS.map((group) => ({
           ...group,
@@ -1103,8 +1105,10 @@
         const N = denominator ?? data.reduce((a, b) => a + b.v, 0);
         const tip = {
           callbacks: {
-            label: (c) =>
-              ` ${c.label}: ${c.parsed.y ?? c.parsed.x ?? c.parsed} (${pct(c.parsed.y ?? c.parsed.x ?? c.parsed, N)})`,
+            label: (c) => {
+              const value = chartValue(c.parsed, horiz);
+              return ` ${c.label}: ${value.toLocaleString()} (${pct(value, N)})`;
+            },
           },
         };
         charts[id] = new Chart($(id), {
